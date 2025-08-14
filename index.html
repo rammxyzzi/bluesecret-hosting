@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blue Secret Hosting</title>
+<style>
+:root {
+  --primary: #2563eb;
+  --secondary: #1e40af;
+  --text: #1f2937;
+  --bg: #f9fafb;
+  --card: #ffffff;
+}
+body.dark {
+  --primary: #60a5fa;
+  --secondary: #3b82f6;
+  --text: #f9fafb;
+  --bg: #111827;
+  --card: #1f2937;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+body { background: var(--bg); color: var(--text); transition: background 0.3s, color 0.3s; }
+
+/* Tombol Hamburger */
+.hamburger {
+  position: fixed; top: 15px; left: 15px;
+  background: rgba(0,0,0,0.7);
+  padding: 10px; border-radius: 8px; border: none;
+  cursor: pointer; z-index: 1002;
+  display: flex; align-items: center; justify-content: center;
+}
+.hamburger svg { width: 24px; height: 24px; stroke: white; } /* selalu putih biar kontras */
+
+/* Overlay Sidebar */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(3px);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease; z-index: 999;
+}
+.overlay.show { opacity: 1; pointer-events: auto; }
+
+/* Sidebar */
+@keyframes slideShake { 0%{transform:translateX(-220px);} 60%{transform:translateX(0);} 75%{transform:translateX(-5px);} 100%{transform:translateX(0);} }
+nav {
+  position: fixed; top: 0; left: -220px; height: 100%; width: 200px;
+  background: #000; padding-top: 2rem;
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.2); transition: left 0.3s ease; z-index: 1000;
+}
+nav.show { left: 0; animation: slideShake 0.4s ease; }
+nav ul { list-style: none; width: 100%; text-align: center; }
+nav li { margin-bottom: 1rem; }
+nav a { color: white; text-decoration: none; font-weight: bold; display: block; padding: 0.5rem; transition: background 0.3s; }
+nav a:hover { background: #333; border-radius: 5px; }
+.toggle-btn { margin-top: auto; margin-bottom: 1rem; background: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+
+/* Konten */
+main, header, footer { padding: 1rem; max-width: 900px; margin: auto; }
+header { text-align: center; padding: 3rem 1rem; }
+header img { width: 150px; height: 150px; border-radius: 50%; border: 4px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+header h1 { color: var(--primary); }
+section { background: var(--card); padding: 2rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 2rem; transition: background 0.3s, color 0.3s; }
+
+/* Testimoni */
+.testimoni-gallery {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;
+}
+.testimoni-gallery img {
+  width: 100%; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transition: transform 0.2s; cursor: pointer;
+}
+.testimoni-gallery img:hover { transform: scale(1.05); }
+
+/* Popup Gambar + Animasi Zoom */
+@keyframes zoomIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.img-popup {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+  touch-action: pan-y; /* tetap bisa scroll vertikal kalau perlu */
+}
+.img-popup.show { opacity: 1; pointer-events: auto; }
+.img-popup img {
+  max-width: 90%; max-height: 90%; border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  animation: zoomIn 0.25s ease;
+  user-select: none;
+}
+
+/* Footer */
+footer { text-align: center; padding: 1rem; background: #e5e7eb; }
+body.dark footer { background: #1f2937; }
+
+@media (min-width: 768px) {
+  nav { left: 0; animation: none; }
+  .hamburger, .overlay { display: none; }
+  main, header, footer { margin-left: 200px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Tombol Hamburger -->
+<button class="hamburger" id="menuBtn" aria-label="Menu">
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+  </svg>
+</button>
+
+<!-- Overlay -->
+<div class="overlay" id="overlay"></div>
+
+<!-- Sidebar Navigasi -->
+<nav id="sidebar">
+  <ul>
+    <li><a href="#tentang">Tentang</a></li>
+      <li><a href="#keahlian">Keahlian</a></li>
+      <li><a href="#proyek">Proyek</a></li>
+      <li><a href="testimoni.html" target="_blank">Testimoni</a></li>
+      <li><a href="product.html" target="_blank">Product</a></li>
+      <li><a href="#kontak">Kontak</a></li>
+    </ul>
+  <button class="toggle-btn" id="toggleTheme">🌙 Dark Mode</button>
+</nav>
+
+<!-- Header -->
+<header>
+  <img src="https://files.catbox.moe/irrlza.png" alt="Foto Profil">
+  <h1>Blue Secret</h1>
+  <p>Hostinger</p>
+</header>
+
+<!-- Main -->
+<main>
+  <section id="tentang">
+    <h2>Tentang Hosting</h2>
+    <p>Hosting ini dibuat untuk membuat para user dengan mudah membuat project, dan memberikan kenyamanan saat melakukan coding.</p>
+  </section>
+  <section id="keahlian">
+    <h2>Keahlian</h2>
+    <p>Hosting ini dapat mendeteksi kesalahan dalam file di bagian console, dan dapat memonitoring player.</p>
+  </section>
+  <section id="proyek">
+    <h2>Proyek</h2>
+    <p>Proyek hosting ini dibuat untuk memudahkan para programmer.</p>
+  </section>
+  <section id="kontak">
+    <h2>Kontak</h2>
+    <p>Email: BlueSecret@gmail.com</p>
+    <p>WhatsApp: <a href="https://wa.me/6283897648825" target="_blank" style="color: var(--primary); text-decoration: underline;">Klik di sini</a></p>
+  </section>
+</main>
+
+<!-- Footer -->
+<footer>&copy; 2025 - Blue Secret Semua Hak Dilindungi.</footer>
+
+<!-- Popup Gambar -->
+<div class="img-popup" id="imgPopup"><img src="" alt="Preview"></div>
+
+<script>
+// Sidebar Toggle
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("overlay");
+menuBtn.addEventListener("click", () => { sidebar.classList.toggle("show"); overlay.classList.toggle("show"); });
+overlay.addEventListener("click", () => { sidebar.classList.remove("show"); overlay.classList.remove("show"); });
+
+// Dark Mode
+const toggleTheme = document.getElementById("toggleTheme");
+toggleTheme.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+  toggleTheme.textContent = document.body.classList.contains("dark") ? "☀️ Light Mode" : "🌙 Dark Mode";
+});
+
+// Popup + Swipe
+const imgs = Array.from(document.querySelectorAll(".testimoni-gallery img"));
+const popup = document.getElementById("imgPopup");
+const popupImg = popup.querySelector("img");
+let currentIndex = 0;
+
+// Open popup
+imgs.forEach((img, idx) => {
+  img.addEventListener("click", () => {
+    currentIndex = idx;
+    popupImg.src = img.src;
+    popup.classList.add("show");
+  });
+});
+
+// Close popup when tap outside image
+popup.addEventListener("click", (e) => {
+  if (e.target === popup) popup.classList.remove("show");
+});
+
+// Swipe logic
+let startX = 0;
+let deltaX = 0;
+const SWIPE_THRESHOLD = 50; // piksel
+
+function showAt(index) {
+  currentIndex = (index + imgs.length) % imgs.length;
+  popupImg.style.animation = "none"; // reset anim
+  // force reflow
+  void popupImg.offsetWidth;
+  popupImg.src = imgs[currentIndex].src;
+  popupImg.style.animation = "zoomIn 0.25s ease"; // apply again
+}
+
+popup.addEventListener("touchstart", (e) => {
+  if (!popup.classList.contains("show")) return;
+  startX = e.touches[0].clientX;
+  deltaX = 0;
+}, {passive: true});
+
+popup.addEventListener("touchmove", (e) => {
+  if (!popup.classList.contains("show")) return;
+  deltaX = e.touches[0].clientX - startX;
+}, {passive: true});
+
+popup.addEventListener("touchend", () => {
+  if (!popup.classList.contains("show")) return;
+  if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
+    if (deltaX < 0) showAt(currentIndex + 1);   // geser kiri → next
+    else showAt(currentIndex - 1);              // geser kanan → prev
+  }
+});
+
+// Opsional: keyboard panah (tidak mengganggu swipe, membantu di desktop)
+document.addEventListener("keydown", (e) => {
+  if (!popup.classList.contains("show")) return;
+  if (e.key === "ArrowRight") showAt(currentIndex + 1);
+  if (e.key === "ArrowLeft") showAt(currentIndex - 1);
+  if (e.key === "Escape") popup.classList.remove("show");
+});
+</script>
+
+</body>
+</html>
